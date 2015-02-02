@@ -8,15 +8,18 @@ import android.os.Parcelable;
  */
 public class Survey implements Parcelable{
     private int _q1, _q2;                       // numeric values correlating to the answer given
+    private int _q1_id, _q2_id;
     private int _num_answered;                  // number of questions answered in the survey
     private long _q1_tstamp, _q2_tstamp;        // timestamps of when the questions were answered
     private boolean _q1_answered, _q2_answered; // indicates which questions have been answered
 
-    public Survey(int q1, int q2, int num_answered, long tstamp1,
+    public Survey(int q1, int q2, int id1, int id2, int num_answered, long tstamp1,
                   long tstamp2, boolean answered1, boolean answered2) {
 
         _q1           = q1;
         _q2           = q2;
+        _q1_id        = id1;
+        _q2_id        = id2;
         _num_answered = num_answered;
         _q1_tstamp    = tstamp1;
         _q2_tstamp    = tstamp2;
@@ -28,6 +31,8 @@ public class Survey implements Parcelable{
         // If the user skips a question, the value of the question will be zero
         _q1           = 0;
         _q2           = 0;
+        _q1_id        = -1;
+        _q2_id        = -1;
         _num_answered = 0;
 
         _q1_tstamp    = -1; // to indicate the timestamp is not yet set
@@ -41,6 +46,8 @@ public class Survey implements Parcelable{
 
     public int     get_q1()           {return _q1;}
     public int     get_q2()           {return _q2;}
+    public int     get_q1_id()        {return _q1_id;}
+    public int     get_q2_id()        {return _q2_id;}
     public int     get_num_answered() {return _num_answered;}
     public long    get_q1_tstamp()    {return _q1_tstamp;}
     public long    get_q2_tstamp()    {return _q2_tstamp;}
@@ -52,6 +59,8 @@ public class Survey implements Parcelable{
     public void inc_num_answered()                {_num_answered++;}
     public void set_q1(int ans)                   {_q1 = ans;}
     public void set_q2(int ans)                   {_q2 = ans;}
+    public void set_q1_id(int id1)                {_q1_id = id1;}
+    public void set_q2_id(int id2)                {_q2_id = id2;}
     public void set_q1_answered(boolean answered) {_q1_answered = answered;}
     public void set_q2_answered(boolean answered) {_q2_answered = answered;}
     public void set_q1_tstamp() {
@@ -72,6 +81,8 @@ public class Survey implements Parcelable{
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(_q1);
         out.writeInt(_q2);
+        out.writeInt(_q1_id);
+        out.writeInt(_q2_id);
         out.writeInt(_num_answered);
         out.writeLong(_q1_tstamp);
         out.writeLong(_q2_tstamp);
@@ -95,6 +106,8 @@ public class Survey implements Parcelable{
     private Survey(Parcel in) {
         _q1           =  in.readInt();
         _q2           =  in.readInt();
+        _q1_id        =  in.readInt();
+        _q2_id        =  in.readInt();
         _num_answered =  in.readInt();
         _q1_tstamp    =  in.readLong();
         _q2_tstamp    =  in.readLong();

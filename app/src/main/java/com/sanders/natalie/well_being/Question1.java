@@ -11,12 +11,16 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.parse.ParseAnalytics;
+import com.parse.ParseClassName;
+import com.parse.ParseObject;
+
 import com.parse.Parse;
 
-public class Question1 extends Activity {
+import java.util.HashMap;
+import java.util.Map;
 
-    //Parse.enableLocalDatastore(this);
-    //Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
+public class Question1 extends Activity {
 
     public Survey survey = new Survey();
     public RadioGroup ansRdioGrp;
@@ -26,14 +30,15 @@ public class Question1 extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question1);
 
+        // Enable Local Datastore.
+        Parse.enableLocalDatastore(this);
+
+        Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
+
+        // Initialize Buttons / Radio Group
+
         final Button nextBttn = (Button) findViewById(R.id.bttnNext);
-        final Button prevBttn = (Button) findViewById(R.id.bttnBack);
         ansRdioGrp            = (RadioGroup) findViewById(R.id.rdioGrpScale);
-
-        Intent curr_intent = getIntent();
-        Survey s = curr_intent.getParcelableExtra("SURVEY");
-
-        if(s != null) { survey = s; }
 
         nextBttn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,7 +48,7 @@ public class Question1 extends Activity {
                 intent.putExtra("SURVEY", survey);
 
                 if (intent != null) {
-                    startActivity(intent);
+                    startActivityForResult(intent, 2);
                 }
             }
         });
@@ -52,26 +57,33 @@ public class Question1 extends Activity {
     public void update_survey() {
         int selectedId = ansRdioGrp.getCheckedRadioButtonId();
         RadioButton ansRdioBttn = (RadioButton) findViewById(selectedId);
+        Toast.makeText(getApplicationContext(), selectedId + " " + survey.get_q1_id(), Toast.LENGTH_SHORT).show();
 
-        if(ansRdioBttn != null) {
+        if(selectedId != survey.get_q1_id()) {
+            Toast.makeText(getApplicationContext(), "update survey", Toast.LENGTH_SHORT).show();
 
-            if(!survey.is_q1_answered()) {
-                survey.inc_num_answered();
-            }
+            survey.set_q1_id(selectedId);
 
-            survey.set_q1_answered(true);
-            survey.set_q1_tstamp();
+            if(ansRdioBttn != null) {
 
-            if (ansRdioBttn.getText().equals("1 - not at all")) {
-                survey.set_q1(1);
-            } else if (ansRdioBttn.getText().equals("2 - Very little")) {
-                survey.set_q1(2);
-            } else if (ansRdioBttn.getText().equals("3 - Somewhat")) {
-                survey.set_q1(3);
-            } else if (ansRdioBttn.getText().equals("4 - Quite a bit")) {
-                survey.set_q1(4);
-            } else if (ansRdioBttn.getText().equals("5 - Extremely")) {
-                survey.set_q1(5);
+                if (!survey.is_q1_answered()) {
+                    survey.inc_num_answered();
+                }
+
+                survey.set_q1_answered(true);
+                survey.set_q1_tstamp();
+
+                if (ansRdioBttn.getText().equals("1 - not at all")) {
+                    survey.set_q1(1);
+                } else if (ansRdioBttn.getText().equals("2 - Very little")) {
+                    survey.set_q1(2);
+                } else if (ansRdioBttn.getText().equals("3 - Somewhat")) {
+                    survey.set_q1(3);
+                } else if (ansRdioBttn.getText().equals("4 - Quite a bit")) {
+                    survey.set_q1(4);
+                } else if (ansRdioBttn.getText().equals("5 - Extremely")) {
+                    survey.set_q1(5);
+                }
             }
         }
     }
@@ -93,5 +105,19 @@ public class Question1 extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 2 && data != null) {
+            Survey s = data.getParcelableExtra("SURVEY");
+            if (s != null) {
+                survey = s;
+            }
+
+            ansRdioGrp.check(survey.get_q1_id());
+        }
     }
 }

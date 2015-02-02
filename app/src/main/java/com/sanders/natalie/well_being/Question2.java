@@ -22,15 +22,17 @@ public class Question2 extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question2);
 
-        survey = new Survey();
-
-        Intent curr_intent = getIntent();
-        Survey s = curr_intent.getParcelableExtra("SURVEY");
-        if(s != null) { survey = s; }
-
         final Button nextBttn = (Button) findViewById(R.id.bttnNext);
         final Button prevBttn = (Button) findViewById(R.id.bttnBack);
         ansRdioGrp = (RadioGroup) findViewById(R.id.rdioGrpScale);
+
+        // If the Q2 activity is accessed from the Q1 activity, the survey object is retrieved from the Q1 activity
+        Intent curr_intent = getIntent();
+        Survey s = curr_intent.getParcelableExtra("SURVEY");
+        if(s != null) {
+            survey = s;
+            ansRdioGrp.check(survey.get_q2_id());
+        }
 
         nextBttn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,7 +42,7 @@ public class Question2 extends Activity {
                 intent.putExtra("SURVEY", survey);
 
                 if (intent != null) {
-                    startActivity(intent);
+                    startActivityForResult(intent, 3);
                 }
             }
         });
@@ -53,6 +55,7 @@ public class Question2 extends Activity {
                 intent.putExtra("SURVEY", survey);
 
                 if(intent != null) {
+                    setResult(2, intent);
                     finish();
                 }
             }
@@ -63,25 +66,31 @@ public class Question2 extends Activity {
         int selectedId = ansRdioGrp.getCheckedRadioButtonId();
         RadioButton ansRdioBttn = (RadioButton) findViewById(selectedId);
 
-        if(ansRdioBttn != null) {
+        if(selectedId != survey.get_q2_id()) {
+            Toast.makeText(getApplicationContext(), "update survey", Toast.LENGTH_SHORT).show();
 
-            if(!survey.is_q2_answered()) {
-                survey.inc_num_answered();
-            }
+            survey.set_q2_id(selectedId);
 
-            survey.set_q2_answered(true);
-            survey.set_q2_tstamp();
+            if(ansRdioBttn != null) {
 
-            if (ansRdioBttn.getText().equals("1 - not at all")) {
-                survey.set_q2(1);
-            } else if (ansRdioBttn.getText().equals("2 - Very little")) {
-                survey.set_q2(2);
-            } else if (ansRdioBttn.getText().equals("3 - Somewhat")) {
-                survey.set_q2(3);
-            } else if (ansRdioBttn.getText().equals("4 - Quite a bit")) {
-                survey.set_q2(4);
-            } else if (ansRdioBttn.getText().equals("5 - Extremely")) {
-                survey.set_q2(5);
+                if (!survey.is_q2_answered()) {
+                    survey.inc_num_answered();
+                }
+
+                survey.set_q2_answered(true);
+                survey.set_q2_tstamp();
+
+                if (ansRdioBttn.getText().equals("1 - not at all")) {
+                    survey.set_q2(1);
+                } else if (ansRdioBttn.getText().equals("2 - Very little")) {
+                    survey.set_q2(2);
+                } else if (ansRdioBttn.getText().equals("3 - Somewhat")) {
+                    survey.set_q2(3);
+                } else if (ansRdioBttn.getText().equals("4 - Quite a bit")) {
+                    survey.set_q2(4);
+                } else if (ansRdioBttn.getText().equals("5 - Extremely")) {
+                    survey.set_q2(5);
+                }
             }
         }
     }
@@ -104,5 +113,19 @@ public class Question2 extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 3 && data != null) {
+            Survey s = data.getParcelableExtra("SURVEY");
+            if (s != null) {
+                survey = s;
+            }
+
+            ansRdioGrp.check(survey.get_q2_id());
+        }
     }
 }

@@ -11,12 +11,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.ParseObject;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Finish extends Activity {
     boolean back_valid = true;
@@ -49,22 +54,26 @@ public class Finish extends Activity {
                 Date dateobj = new Date();
 
                 createCVS(df.format(dateobj) + ".csv");
+
+                //TODO Submit survey to parse website
+                sendToParse();
+
                 Intent startMain = new Intent(Intent.ACTION_MAIN);
                 startMain.addCategory(Intent.CATEGORY_HOME);
                 startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(startMain);            }
         });
 
-                //TODO Submit survey to parse website
 
 
 
         prevBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
+                Intent intent = new Intent(Finish.this, Question2.class);
                 intent.putExtra("SURVEY", survey);
                 if(intent != null && back_valid) {
+                    setResult(3, intent);
                     finish();
                 }
             }
@@ -114,6 +123,31 @@ public class Finish extends Activity {
         catch(IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void sendToParse() {
+        /*Map<String, String> Q1 = new HashMap<String, String>();
+        Map<String, String> Q2 = new HashMap<String, String>();
+
+        Q1.put("value", String.valueOf(survey.get_q1()));
+        Q2.put("value", String.valueOf(survey.get_q2()));
+        Q1.put("timestamp", String.valueOf(survey.get_q1_tstamp()));
+        Q2.put("timestamp", String.valueOf(survey.get_q2_tstamp()));*/
+
+        ParseObject Q1 = new ParseObject("Q1");
+        Q1.put("value", survey.get_q1());
+        Q1.put("timestamp", survey.get_q1_tstamp());
+
+        ParseObject Q2 = new ParseObject("Q2");
+        Q2.put("value", survey.get_q2());
+        Q2.put("timestamp", survey.get_q2_tstamp());
+
+        ParseObject wellbeingSurvey = new ParseObject("survey");
+        wellbeingSurvey.put("Q1", Q1);
+        wellbeingSurvey.put("Q2", Q2);
+        wellbeingSurvey.saveInBackground();
+
 
     }
 
