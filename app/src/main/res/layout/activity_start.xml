@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.sanders.natalie.well_being.Start"
+    android:background="#ff364cff"
+    android:id="@+id/relative_layout">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/start"
+        android:id="@+id/txtStartTitle"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="#ffffffff"
+        android:textSize="40sp"
+        android:layout_margin="5dp" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/txtSettings"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/tableSettings"
+        android:layout_margin="5dp">
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:background="#ff85ff31"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:text="@string/time_change"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#ff364cff"
+                android:layout_margin="5dp" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:background="#ff85ff31"
+            android:layout_marginBottom="2dp">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:text="Start Survey Manually"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#ff364cff"
+                android:layout_margin="5dp" />
+        </TableRow>
+
+    </TableLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Administrator Settings"
+        android:id="@+id/txtSettings"
+        android:layout_below="@+id/txtStartTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:textColor="#ffffffff" />
+</RelativeLayout>

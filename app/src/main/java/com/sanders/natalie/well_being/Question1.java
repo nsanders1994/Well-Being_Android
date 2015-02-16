@@ -1,6 +1,10 @@
 package com.sanders.natalie.well_being;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,16 +13,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.Toast;
-
-import com.parse.ParseAnalytics;
-import com.parse.ParseClassName;
-import com.parse.ParseObject;
-
 import com.parse.Parse;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Calendar;
 
 public class Question1 extends Activity {
 
@@ -29,16 +29,18 @@ public class Question1 extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question1);
+        //setContentView(R.layout.activity_question_1);
 
-        // Enable Local Datastore.
-        Parse.enableLocalDatastore(this);
-
-        Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
 
         // Initialize Buttons / Radio Group
 
         final Button nextBttn = (Button) findViewById(R.id.bttnNext);
         ansRdioGrp            = (RadioGroup) findViewById(R.id.rdioGrpScale);
+        /*TableRow R1 = (TableRow) findViewById(R.id.tableRow1);
+        TableRow R2 = (TableRow) findViewById(R.id.tableRow2);
+        TableRow R3 = (TableRow) findViewById(R.id.tableRow3);
+        TableRow R4 = (TableRow) findViewById(R.id.tableRow4);
+        TableRow R5 = (TableRow) findViewById(R.id.tableRow5);*/
 
         nextBttn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,20 +49,53 @@ public class Question1 extends Activity {
                 update_survey();
                 intent.putExtra("SURVEY", survey);
 
-                if (intent != null) {
-                    startActivityForResult(intent, 2);
-                }
+                startActivityForResult(intent, 2);
             }
         });
+
+        /*R1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.setBackgroundColor(getResources().getColor(android.res.));
+            }
+        });
+
+        R2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        R3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        R4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        R5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });*/
     }
+
+
 
     public void update_survey() {
         int selectedId = ansRdioGrp.getCheckedRadioButtonId();
         RadioButton ansRdioBttn = (RadioButton) findViewById(selectedId);
-        Toast.makeText(getApplicationContext(), selectedId + " " + survey.get_q1_id(), Toast.LENGTH_SHORT).show();
 
         if(selectedId != survey.get_q1_id()) {
-            Toast.makeText(getApplicationContext(), "update survey", Toast.LENGTH_SHORT).show();
 
             survey.set_q1_id(selectedId);
 

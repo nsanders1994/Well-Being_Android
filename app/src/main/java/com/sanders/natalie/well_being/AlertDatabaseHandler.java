@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Natalie on 2/3/2015.
  */
-public class DatabaseHandler extends SQLiteOpenHelper {
+public class AlertDatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION   = 1;
     private static final String DATABASE_NAME   = "wellbeingManager";
     private static final String KEY_ID          = "id";
@@ -22,7 +22,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_POPUP_MIN   = "popup_min";
 
 
-    public DatabaseHandler(Context context) {
+    public AlertDatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

@@ -3,22 +3,28 @@
     package="com.sanders.natalie.well_being" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission
+        android:name="com.sanders.natalie.well_being.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.sanders.natalie.well_being.permission.C2D_MESSAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/name"
+        android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
             android:name=".Question1"
             android:label="@string/title_activity_question1" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".Question2"
@@ -27,6 +33,82 @@
         <activity
             android:name=".Finish"
             android:label="@string/title_activity_finish" >
+        </activity>
+
+        <receiver
+            android:name=".OnBoot"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".Dialog"
+            android:theme="@android:style/Theme.Holo.Light.Dialog" >
+        </activity>
+
+        <service android:name=".PopupService" />
+
+        <activity
+            android:name=".DelayExplanation"
+            android:label="@string/title_activity_delay_explanation"
+            android:noHistory="true" >
+        </activity>
+        <activity
+            android:name=".Start"
+            android:label="@string/app_name" >
+
+        </activity>
+        <activity
+            android:name=".Question1_Slider"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ChangeSettings"
+            android:theme="@android:style/Theme.Holo.Light.Dialog" >
+        </activity>
+
+        <service android:name="com.parse.PushService" />
+
+        <receiver android:name="com.parse.ParseBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.parse.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="com.sanders.natalie.well_being" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.parse.ParsePushBroadcastReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.parse.push.intent.RECEIVE" />
+                <action android:name="com.parse.push.intent.OPEN" />
+                <action android:name="com.parse.push.intent.DELETE" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".Question3"
+            android:label="@string/title_activity_question3" >
+        </activity>
+        <activity
+            android:name=".Question4"
+            android:label="@string/title_activity_question4" >
         </activity>
     </application>
 
