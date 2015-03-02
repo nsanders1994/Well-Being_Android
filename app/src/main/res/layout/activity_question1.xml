@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/Q1"
-        android:id="@+id/txtHeader"
+        android:id="@+id/txtBaseQues"
         android:textColor="#ffffffff"
         android:textSize="37sp"
         android:typeface="sans"
@@ -28,11 +28,11 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/Q1.1"
-        android:id="@+id/txtQ1.2"
+        android:id="@+id/txtSubQues"
         android:textColor="#ffffffff"
         android:typeface="sans"
         android:textSize="25.5sp"
-        android:layout_below="@+id/txtHeader"
+        android:layout_below="@+id/txtBaseQues"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerHorizontal="true" />
@@ -40,7 +40,7 @@
     <RadioGroup
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/txtQ1.2"
+        android:layout_below="@+id/txtSubQues"
         android:id="@+id/rdioGrpScale"
         android:layout_marginTop="10dp"
         android:layout_centerHorizontal="true">

@@ -19,6 +19,7 @@ import android.widget.Toast;
  * Created by Natalie on 12/17/2014.
  */
 public class Dialog extends Activity {
+    int ID = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +37,8 @@ public class Dialog extends Activity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // Update Delays
-                        int delays = dbHandler.getDelays() + 1;
-                        dbHandler.setDelays(delays);
+                        int delays = dbHandler.getDelays(ID) + 1;
+                        dbHandler.setDelays(delays, ID);
 
                         if (delays < 2) {
                             Intent intent = new Intent(Dialog.this, PopupService.class);
@@ -51,7 +52,7 @@ public class Dialog extends Activity {
                             dialogInterface.cancel();
                             finish();
                         } else if (delays == 2) {
-                            dbHandler.setDelays(0);
+                            dbHandler.setDelays(0, ID);
                             dialogInterface.cancel();
                             finish();
                         }
@@ -60,10 +61,10 @@ public class Dialog extends Activity {
                 })
                 .setNeutralButton("Okay", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(getApplicationContext(), String.valueOf(dbHandler.getDelays()), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), String.valueOf(dbHandler.getDelays(ID)), Toast.LENGTH_SHORT).show();
 
-                        if (dbHandler.getDelays() > 0) {
-                            dbHandler.setDelays(0);
+                        if (dbHandler.getDelays(ID) > 0) {
+                            dbHandler.setDelays(0, ID);
                             Intent i = new Intent(getApplicationContext(), DelayExplanation.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -71,7 +72,7 @@ public class Dialog extends Activity {
                             dialog.cancel();
                             finish();
                         } else {
-                            dbHandler.setDelays(0);
+                            dbHandler.setDelays(0, ID);
                             Intent i = new Intent(getApplicationContext(), Question1.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);

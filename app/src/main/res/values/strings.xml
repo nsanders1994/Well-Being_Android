@@ -9,6 +9,8 @@
     <string name="next">Next</string>
     <string name="progress">0/4 Questions Completed</string>
     <string name="delay_exp">Could you explain why you had to delay taking the survey?</string>
+    <string name="survey_name">Survey</string>
+    <string name="survey_time">Time</string>
     <string name="scale1">1 - Not at all</string>
     <string name="scale2">2 - Very little</string>
     <string name="scale3">3 - Somewhat</string>
@@ -31,5 +33,6 @@
     <string name="title_activity_question4">Question4</string>
     <string name="time_change">Change Pop-Up Time</string>
     <string name="manual_startup">Start Survey Manually</string>
+    <string name="Checkmark">Checkmark</string>
 
 </resources>

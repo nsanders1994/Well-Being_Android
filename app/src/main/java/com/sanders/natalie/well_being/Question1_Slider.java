@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.parse.Parse;
 import com.parse.ParseObject;
 
 import java.io.File;
@@ -45,14 +44,11 @@ public class Question1_Slider extends Activity {
 
         setContentView(R.layout.activity_question1_slider);
 
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
-
         alertHandler = new AlertDatabaseHandler(getApplicationContext());
         surveyHandler = new SurveyDatabaseHandler(getApplicationContext());
 
 
-        final Button submitBttn = (Button) findViewById(R.id.bttnSubmit);
+        final Button submitBttn = (Button) findViewById(R.id.bttnNext);
 
         seekBar1 = (SeekBar) findViewById(R.id.seekBar1);
         seekBar2 = (SeekBar) findViewById(R.id.seekBar2);
@@ -251,7 +247,7 @@ public class Question1_Slider extends Activity {
         PendingIntent pendingIntent = PendingIntent.getService(
                 getApplicationContext(),
                 1,
-                new Intent(getApplicationContext(), DailyService.class),
+                new Intent(getApplicationContext(), UpdateService.class),
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

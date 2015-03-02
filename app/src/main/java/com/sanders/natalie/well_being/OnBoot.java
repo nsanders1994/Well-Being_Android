@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by Natalie on 12/17/2014.
@@ -14,61 +15,69 @@ import java.util.Calendar;
 public class OnBoot extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Create a repeating alarm to run IntentService that is impervious to killing the app or the phone going to sleep
 
+        // Retrieve number of surveys from database
         final AlertDatabaseHandler dbHandler = new AlertDatabaseHandler(context);
+        List<Integer> survey_ids = dbHandler.getSurveyIDs();
 
-        PendingIntent pendingIntent = PendingIntent.getService(
-                context,
-                0,
-                new Intent(context, PopupService.class),
-                PendingIntent.FLAG_CANCEL_CURRENT);
+        // Create a repeating alarm for popup for every survey at the specified time
+        for (int j = 0; j < survey_ids.size(); j++) {
 
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            int curr_id = survey_ids.get(j);
 
-        // Set time for survey pop-up
-        Calendar cal = Calendar.getInstance();
+            Intent popup_intent = new Intent(context, PopupService.class);
+            popup_intent.putExtra("ID", curr_id);
 
-        // Get alarm time
-        int hr = dbHandler.getHr();
-        int min = dbHandler.getMin();
-        int curr_hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        int curr_min = Calendar.getInstance().get(Calendar.MINUTE);
+            PendingIntent pendingIntent = PendingIntent.getService(
+                    context,
+                    curr_id,
+                    popup_intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        // If it's after the alarm time, schedule for next day
-        if ( curr_hr > hr || curr_hr == hr && curr_min > min) {
-            cal.add(Calendar.DAY_OF_YEAR, 1); // add, not set!
+            // Set time for survey pop-up
+            Calendar cal = Calendar.getInstance();
+
+            // Get alarm time
+            int hr = dbHandler.getHr(curr_id);
+            int min = dbHandler.getMin(curr_id);
+            int curr_hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            int curr_min = Calendar.getInstance().get(Calendar.MINUTE);
+
+            // If it's after the alarm time, schedule for next day
+            if ( curr_hr > hr || curr_hr == hr && curr_min > min) {
+                cal.add(Calendar.DAY_OF_YEAR, 1); // add, not set!
+            }
+
+            cal.set(Calendar.HOUR_OF_DAY, hr);
+            cal.set(Calendar.MINUTE, min);
+            cal.set(Calendar.SECOND, 0);
+
+            // Set alarm for survey pop-up to go off
+            alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    cal.getTimeInMillis(),
+                    alarmManager.INTERVAL_DAY,
+                    pendingIntent);
         }
-
-        cal.set(Calendar.HOUR_OF_DAY, hr);
-        cal.set(Calendar.MINUTE, min);
-        cal.set(Calendar.SECOND, 0);
-
-        // Set alarm for survey pop-up to go off at default of 8:00 AM
-        alarmManager.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                cal.getTimeInMillis(),
-                alarmManager.INTERVAL_DAY,
-                pendingIntent);
-
 
         // Start alarm for a service which checks for updates
         PendingIntent pendingIntent2 = PendingIntent.getService(
                 context,
-                1,
-                new Intent(context, DailyService.class),
+                -1,
+                new Intent(context, UpdateService.class),
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmManager2 = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         Calendar cal2 = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
+        cal2.set(Calendar.HOUR_OF_DAY, 0);
+        cal2.set(Calendar.MINUTE, 0);
 
         alarmManager2.setInexactRepeating(
                 AlarmManager.RTC,
                 cal2.getTimeInMillis(),
-                alarmManager.INTERVAL_DAY,
+                alarmManager2.INTERVAL_DAY,
                 pendingIntent2);
     }
 }

@@ -3,7 +3,6 @@ package com.sanders.natalie.well_being;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -13,20 +12,18 @@ import com.parse.GetCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParsePush;
 import com.parse.ParseQuery;
-import com.parse.SaveCallback;
 
 import java.util.Calendar;
 
 /**
  * Created by Natalie on 2/15/2015.
  */
-public class DailyService extends IntentService {
+public class UpdateService extends IntentService {
 
     AlertDatabaseHandler dbHandler;
 
-    public DailyService() {
+    public UpdateService() {
         super("Service");
     }
 
@@ -42,6 +39,7 @@ public class DailyService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Updates");
         query.orderByDescending("updatedAt");
+        // TODO Collect all updates within 24 hr peroid; iterate from oldest to newest
         query.getFirstInBackground(new GetCallback<ParseObject>() {
             public void done(ParseObject object, ParseException e) {
                 if (object == null) {
@@ -65,7 +63,7 @@ public class DailyService extends IntentService {
         PendingIntent pendingIntent = PendingIntent.getService(
                 getApplicationContext(),
                 0,
-                new Intent(DailyService.this, PopupService.class),
+                new Intent(UpdateService.this, PopupService.class),
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

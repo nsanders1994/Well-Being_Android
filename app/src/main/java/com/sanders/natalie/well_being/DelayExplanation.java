@@ -11,9 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.parse.Parse;
-
-
 public class DelayExplanation extends Activity {
     EditText expTxt;
 
@@ -22,11 +19,7 @@ public class DelayExplanation extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delay_explanation);
 
-        // Enable Local Datastore.
-        //Parse.enableLocalDatastore(this);
-        //Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
-
-        final Button submitBttn = (Button) findViewById(R.id.bttnSubmit);
+        final Button submitBttn = (Button) findViewById(R.id.bttnNext);
         expTxt = (EditText) findViewById(R.id.editExplanation);
 
         expTxt.addTextChangedListener(new TextWatcher() {

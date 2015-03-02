@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.Parse;
 import com.parse.ParseObject;
 
 import java.io.File;
@@ -22,32 +20,39 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 public class Finish extends Activity {
-    boolean back_valid = true;
-    public Survey survey = new Survey();
+    boolean back_valid    = true;
+    //public  Survey survey = new Survey();
+    int     ans_ct = 0;
+    int  [] ans;
+    long [] tstamp;
+    int     size;
+    int     id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
-
         setContentView(R.layout.activity_finish);
 
-        final Button submitBttn = (Button) findViewById(R.id.bttnSubmit);
+        final Button submitBttn = (Button) findViewById(R.id.bttnNext);
         final Button prevBttn   = (Button) findViewById(R.id.bttnBack);
         TextView progressTxt    = (TextView) findViewById(R.id.txtProgress);
 
         Intent curr_intent = getIntent();
-        Survey s = curr_intent.getParcelableExtra("SURVEY");
-        if(s != null) { survey = s; }
+        ans_ct = curr_intent.getIntExtra("CT", 0);
+        ans    = curr_intent.getIntArrayExtra("ANS");
+        tstamp = curr_intent.getLongArrayExtra("TSTAMP");
+        id     = curr_intent.getIntExtra("ID", 0);
+        size = ans.length;
+        //Survey s = curr_intent.getParcelableExtra("SURVEY");
+        //if(s != null) { survey = s; }
 
-        int n = survey.get_num_answered();
-        progressTxt.setText(n + "/4 Questions Answered");
+        progressTxt.setText(ans_ct + "/" + size + " Questions Answered");
+        //int n = survey.get_num_answered();
+        //progressTxt.setText(n + "/4 Questions Answered");
 
         submitBttn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +65,7 @@ public class Finish extends Activity {
                     DateFormat df = new SimpleDateFormat("MM-dd-yy_HH:mm");
                     Date dateobj = new Date();
 
-                    createCVS(df.format(dateobj) + ".csv");
+                    //createCVS(df.format(dateobj) + ".csv");
 
                     // Submit survey to parse website
                     sendToParse();
@@ -82,9 +87,11 @@ public class Finish extends Activity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Finish.this, Question2.class);
-                intent.putExtra("SURVEY", survey);
+                intent.putExtra("ANS", ans);
+                intent.putExtra("TSTAMP", tstamp);
+                //intent.putExtra("SURVEY", survey);
                 if(intent != null && back_valid) {
-                    setResult(3, intent);
+                    setResult(5, intent);
                     finish();
                 }
                 else {
@@ -106,7 +113,7 @@ public class Finish extends Activity {
         }
     }
 
-    public void createCVS(String filename) {
+   /* public void createCVS(String filename) {
         try {
             File root = Environment.getExternalStorageDirectory().getAbsoluteFile();
             File folder = new File(root, "Wellbeing-Surveys");
@@ -150,10 +157,24 @@ public class Finish extends Activity {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
     public void sendToParse() {
 
+        ParseObject new_survey = new ParseObject("Survey"); //Installation.id(this));
+        new_survey.put("PID", Installation.id(this));
+
+        for(int i = 0; i < size; i++) {
+            Map<String, String> ques = new HashMap<String, String>();
+            ques.put("value", String.valueOf(ans[i]));
+            ques.put("timestamp", String.valueOf(tstamp[i]));
+
+            new_survey.put("Q" + String.valueOf(i+1), ques);
+        }
+
+        new_survey.saveInBackground();
+
+        /*
         Map<String, String> Q1 = new HashMap<String, String>();
         Map<String, String> Q2 = new HashMap<String, String>();
         Map<String, String> Q3 = new HashMap<String, String>();
@@ -169,13 +190,12 @@ public class Finish extends Activity {
         Q3.put("timestamp", String.valueOf(survey.get_q3_tstamp()));
         Q4.put("timestamp", String.valueOf(survey.get_q4_tstamp()));
 
-        ParseObject new_survey = new ParseObject("Survey"); //Installation.id(this));
         new_survey.put("PID", Installation.id(this));
         new_survey.put("Q1", Q1);
         new_survey.put("Q2", Q2);
         new_survey.put("Q3", Q3);
         new_survey.put("Q4", Q4);
-        new_survey.saveInBackground();
+        new_survey.saveInBackground(); */
     }
 
     @Override

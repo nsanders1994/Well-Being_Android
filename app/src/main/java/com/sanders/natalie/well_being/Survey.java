@@ -10,7 +10,7 @@ public class Survey implements Parcelable{
     // numeric values correlating to the answer given
     private int _q1, _q2, _q3, _q4;
     // IDs of the button pressed for each question
-    private int _q1_id, _q2_id, _q3_id, _q4_id;
+    private int _id;
     // number of questions answered in the survey
     private int _num_answered;
     // timestamps of when the questions were answered
@@ -24,10 +24,7 @@ public class Survey implements Parcelable{
         _q2           = 0;
         _q3           = 0;
         _q4           = 0;
-        _q1_id        = -1;
-        _q2_id        = -1;
-        _q3_id        = -1;
-        _q4_id        = -1;
+        _id           = -1;
         _num_answered = 0;
 
         // to indicate the timestamp is not yet set
@@ -43,16 +40,13 @@ public class Survey implements Parcelable{
         _q4_answered  = false;
     }
 
-    public Survey(int q1, int q2, int q3, int q4, long q1_t, long q2_t, long q3_t, long q4_t) {
+    public Survey(int q1, int q2, int q3, int q4, long q1_t, long q2_t, long q3_t, long q4_t, int id) {
         // If the user skips a question, the value of the question will be zero
         _q1           = q1;
         _q2           = q2;
         _q3           = q3;
         _q4           = q4;
-        _q1_id        = -1;
-        _q2_id        = -1;
-        _q3_id        = -1;
-        _q4_id        = -1;
+        _id           = id;
         _num_answered = 0;
 
         // to indicate the timestamp is not yet set
@@ -74,10 +68,7 @@ public class Survey implements Parcelable{
     public int     get_q2()           {return _q2;}
     public int     get_q3()           {return _q3;}
     public int     get_q4()           {return _q4;}
-    public int     get_q1_id()        {return _q1_id;}
-    public int     get_q2_id()        {return _q2_id;}
-    public int     get_q3_id()        {return _q3_id;}
-    public int     get_q4_id()        {return _q4_id;}
+    public int     get_id()           {return _id;}
     public int     get_num_answered() {return _num_answered;}
     public long    get_q1_tstamp()    {return _q1_tstamp;}
     public long    get_q2_tstamp()    {return _q2_tstamp;}
@@ -95,10 +86,7 @@ public class Survey implements Parcelable{
     public void set_q2(int ans)                   {_q2 = ans;}
     public void set_q3(int ans)                   {_q3 = ans;}
     public void set_q4(int ans)                   {_q4 = ans;}
-    public void set_q1_id(int id1)                {_q1_id = id1;}
-    public void set_q2_id(int id2)                {_q2_id = id2;}
-    public void set_q3_id(int id3)                {_q3_id = id3;}
-    public void set_q4_id(int id4)                {_q4_id = id4;}
+    public void set_id(int id)                    {_id = id;}
     public void set_q1_answered(boolean answered) {_q1_answered = answered;}
     public void set_q2_answered(boolean answered) {_q2_answered = answered;}
     public void set_q3_answered(boolean answered) {_q3_answered = answered;}
@@ -131,10 +119,7 @@ public class Survey implements Parcelable{
         out.writeInt(_q2);
         out.writeInt(_q3);
         out.writeInt(_q4);
-        out.writeInt(_q1_id);
-        out.writeInt(_q2_id);
-        out.writeInt(_q3_id);
-        out.writeInt(_q4_id);
+        out.writeInt(_id);
         out.writeInt(_num_answered);
         out.writeLong(_q1_tstamp);
         out.writeLong(_q2_tstamp);
@@ -164,10 +149,7 @@ public class Survey implements Parcelable{
         _q2           =  in.readInt();
         _q3           =  in.readInt();
         _q4           =  in.readInt();
-        _q1_id        =  in.readInt();
-        _q2_id        =  in.readInt();
-        _q3_id        =  in.readInt();
-        _q4_id        =  in.readInt();
+        _id           =  in.readInt();
         _num_answered =  in.readInt();
         _q1_tstamp    =  in.readLong();
         _q2_tstamp    =  in.readLong();
