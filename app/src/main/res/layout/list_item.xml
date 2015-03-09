@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/survey_name"
-        android:id="@+id/txtSurveyName"
+        android:id="@+id/txtBaseQ"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/imageView"
         android:layout_toEndOf="@+id/imageView"
@@ -29,8 +29,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/survey_time"
-        android:id="@+id/txtSurveyTime"
-        android:layout_below="@+id/txtSurveyName"
+        android:id="@+id/txtSubQ4"
+        android:layout_below="@+id/txtBaseQ"
         android:layout_toRightOf="@+id/imageView"
         android:layout_toEndOf="@+id/imageView" />
 </RelativeLayout>

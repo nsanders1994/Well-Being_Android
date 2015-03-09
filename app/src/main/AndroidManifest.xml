@@ -26,11 +26,7 @@
         <activity
             android:name=".Question1"
             android:label="@string/title_activity_question1" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".Question2"
@@ -64,13 +60,23 @@
         <activity
             android:name=".Start"
             android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".Question1_Slider"
             android:label="@string/app_name">
 
-            </activity>
+        </activity>
+
+        <activity
+            android:name=".Questions"
+            android:label="@string/app_name">
+
+        </activity>
         <activity
             android:name=".ChangeSettings"
             android:theme="@android:style/Theme.Holo.Light.Dialog" >

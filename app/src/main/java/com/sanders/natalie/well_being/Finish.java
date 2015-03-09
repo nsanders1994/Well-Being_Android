@@ -161,7 +161,7 @@ public class Finish extends Activity {
 
     public void sendToParse() {
 
-        ParseObject new_survey = new ParseObject("Survey"); //Installation.id(this));
+        ParseObject new_survey = new ParseObject("SurveyAnswers"); //Installation.id(this));
         new_survey.put("PID", Installation.id(this));
 
         for(int i = 0; i < size; i++) {

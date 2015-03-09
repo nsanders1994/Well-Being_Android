@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.parse.ParseObject;
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,36 +32,68 @@ import java.util.Map;
 public class Question1_Slider extends Activity {
 
     Survey survey = new Survey();
-    SeekBar seekBar1;
-    SeekBar seekBar2;
-    SeekBar seekBar3;
-    SeekBar seekBar4;
+
+    Button  nextBttn;
+    SeekBar  seekBar1;
+    SeekBar  seekBar2;
+    SeekBar  seekBar3;
+    SeekBar  seekBar4;
+
+    TextView baseQTxt;
+    TextView subQTxt1;
+    TextView subQTxt2;
+    TextView subQTxt3;
+    TextView subQTxt4;
+    TextView [] subQ = {subQTxt1, subQTxt2, subQTxt3, subQTxt4};
+
     boolean back_valid = true;
-    AlertDatabaseHandler alertHandler;
+    AlertDatabaseHandler dbHandler;
     SurveyDatabaseHandler surveyHandler;
+
+    private int       id;
+    private String    question;
+    private List<String> sub_ques; // {getString(R.string.Q1_1)
+    private long   [] tstamp;
+    private int    [] ans;
+    private int       size;
+    private int       ans_ct  = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_question1_slider);
-
-        alertHandler = new AlertDatabaseHandler(getApplicationContext());
+        dbHandler = new AlertDatabaseHandler(getApplicationContext());
         surveyHandler = new SurveyDatabaseHandler(getApplicationContext());
 
+        // Retrieve survey's id
+        Intent curr_intent = getIntent();
+        id = curr_intent.getIntExtra("ID", 0);
 
-        final Button submitBttn = (Button) findViewById(R.id.bttnNext);
+        // Initialize variables
+        question = dbHandler.getBaseQues(id);
+        sub_ques = dbHandler.getSubQuesArray(id);
+        size     = sub_ques.size();
+        ans      = new int[size];
+        tstamp   = new long[size];
 
-        seekBar1 = (SeekBar) findViewById(R.id.seekBar1);
-        seekBar2 = (SeekBar) findViewById(R.id.seekBar2);
-        seekBar3 = (SeekBar) findViewById(R.id.seekBar3);
-        seekBar4 = (SeekBar) findViewById(R.id.seekBar4);
+        // Initialize Layout
+        nextBttn = (Button)   findViewById(R.id.bttnNext);
+        seekBar1 = (SeekBar)  findViewById(R.id.seekBar1);
+        seekBar2 = (SeekBar)  findViewById(R.id.seekBar2);
+        seekBar3 = (SeekBar)  findViewById(R.id.seekBar3);
+        seekBar4 = (SeekBar)  findViewById(R.id.seekBar4);
+        subQTxt1 = (TextView) findViewById(R.id.txtSubQ1);
+        subQTxt2 = (TextView) findViewById(R.id.txtSubQ2);
+        subQTxt3 = (TextView) findViewById(R.id.txtSubQ3);
+        subQTxt4 = (TextView) findViewById(R.id.txtSubQ4);
+        baseQTxt = (TextView) findViewById(R.id.txtBaseQ);
 
-        // Start system alarm for the survey popup if not already started
-        start_DialogAlarm();
-
-        // Start background service to check for updated popup times
-        start_UpdatesService();
+        // Initialize View
+        setContentView(R.layout.activity_question1_slider);
+        baseQTxt.setText(question);
+        for(int i = 0; i < subQ.length; i++) {
+            subQ[i].setText(sub_ques.get(i));
+        }
 
         seekBar1.setProgress(0);
         seekBar1.setMax(5);
@@ -86,8 +120,8 @@ public class Question1_Slider extends Activity {
         seekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                survey.set_q1(i);
-                survey.set_q1_tstamp();
+                ans[0] = 1;
+                set_tstamp(0);
             }
 
             @Override
@@ -100,8 +134,8 @@ public class Question1_Slider extends Activity {
         seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                survey.set_q2(i);
-                survey.set_q2_tstamp();
+                ans[1] = 2;
+                set_tstamp(1);
             }
 
             @Override
@@ -114,8 +148,8 @@ public class Question1_Slider extends Activity {
         seekBar3.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                survey.set_q3(i);
-                survey.set_q3_tstamp();
+                ans[2] = 3;
+                set_tstamp(2);
             }
 
             @Override
@@ -128,8 +162,8 @@ public class Question1_Slider extends Activity {
         seekBar4.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                survey.set_q4(i);
-                survey.set_q4_tstamp();
+                ans[3] = 4;
+                set_tstamp(3);
             }
 
             @Override
@@ -139,177 +173,24 @@ public class Question1_Slider extends Activity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        submitBttn.setOnClickListener(new View.OnClickListener() {
+        nextBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(back_valid) {
-                    Toast.makeText(getApplicationContext(), "The survey has been submitted.", Toast.LENGTH_SHORT).show();
-                    back_valid = false;
+                Intent intent = new Intent(Question1_Slider.this, Finish.class);
+                intent.putExtra("ANS", ans);
+                intent.putExtra("TSTAMP", tstamp);
+                intent.putExtra("CT", ans_ct);
+                intent.putExtra("ID", id);
 
-                    // Send survey data to csv file on phone
-                    DateFormat df = new SimpleDateFormat("MM-dd-yy_HH:mm");
-                    Date dateobj = new Date();
+                startActivityForResult(intent, 5);
 
-                    createCVS(df.format(dateobj) + ".csv");
-
-                    // Submit survey to parse website
-                    sendToParse();
-
-                    surveyHandler.putSurvey(survey);
-                    // TODO Return to start screen of app as result 4, in start screen activity go to home screen on returned 4
-                    // Return to home screen
-                    Intent startMain = new Intent(Intent.ACTION_MAIN);
-                    startMain.addCategory(Intent.CATEGORY_HOME);
-                    startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(startMain);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "This survey has already been submitted.", Toast.LENGTH_SHORT).show();
-                }
             }
         });
     }
 
-    public void createCVS(String filename) {
-        try {
-            File root = Environment.getExternalStorageDirectory().getAbsoluteFile();
-            File folder = new File(root, "Wellbeing-Surveys");
-            boolean success = true;
-
-            if(!folder.exists()) {
-                success = folder.mkdir();
-            }
-
-            if(success) {
-                File csv = new File(folder, filename);
-
-                FileWriter fileWriter = new FileWriter(csv);
-
-                fileWriter.append("QuestionNumber");
-                fileWriter.append(",");
-                fileWriter.append("Value");
-                fileWriter.append(",");
-                fileWriter.append("UnixTimeStamp");
-                fileWriter.append("\n");
-
-                fileWriter.append("Q1.1");
-                fileWriter.append(",");
-                fileWriter.append(String.valueOf(survey.get_q1()));
-                fileWriter.append(",");
-                fileWriter.append(String.valueOf(survey.get_q1_tstamp()));
-                fileWriter.append("\n");
-
-                fileWriter.append("Q1.2");
-                fileWriter.append(",");
-                fileWriter.append(String.valueOf(survey.get_q2()));
-                fileWriter.append(",");
-                fileWriter.append(String.valueOf(survey.get_q2_tstamp()));
-                fileWriter.append("\n");
-
-                fileWriter.close();
-            }
-
+    public void set_tstamp(int qNo) {
+        if(ans[qNo] != 0) {
+            tstamp[qNo] = System.currentTimeMillis() / 1000L;
         }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
-
     }
-
-    public void sendToParse() {
-
-        Map<String, String> Q1 = new HashMap<String, String>();
-        Map<String, String> Q2 = new HashMap<String, String>();
-        Map<String, String> Q3 = new HashMap<String, String>();
-        Map<String, String> Q4 = new HashMap<String, String>();
-
-        Q1.put("value", String.valueOf(survey.get_q1()));
-        Q2.put("value", String.valueOf(survey.get_q2()));
-        Q3.put("value", String.valueOf(survey.get_q3()));
-        Q4.put("value", String.valueOf(survey.get_q4()));
-
-        Q1.put("timestamp", String.valueOf(survey.get_q1_tstamp()));
-        Q2.put("timestamp", String.valueOf(survey.get_q2_tstamp()));
-        Q3.put("timestamp", String.valueOf(survey.get_q3_tstamp()));
-        Q4.put("timestamp", String.valueOf(survey.get_q4_tstamp()));
-
-        ParseObject new_survey = new ParseObject("Survey"); //Installation.id(this));
-        new_survey.put("PID", Installation.id(this));
-        new_survey.put("Q1", Q1);
-        new_survey.put("Q2", Q2);
-        new_survey.put("Q3", Q3);
-        new_survey.put("Q4", Q4);
-        new_survey.saveInBackground();
-    }
-
-    public void start_UpdatesService() {
-
-        PendingIntent pendingIntent = PendingIntent.getService(
-                getApplicationContext(),
-                1,
-                new Intent(getApplicationContext(), UpdateService.class),
-                PendingIntent.FLAG_CANCEL_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-
-        alarmManager.setInexactRepeating(
-                AlarmManager.RTC,
-                cal.getTimeInMillis(),
-                alarmManager.INTERVAL_DAY,
-                pendingIntent);
-    }
-    public void start_DialogAlarm() {
-
-        // Database handler for accessing alarm time
-        if(alertHandler.isInitialized() > 0) {
-            alertHandler.setHr(0);
-            alertHandler.setMin(0);
-        }
-        else {
-            alertHandler.init();
-            alertHandler.setHr(0);
-            alertHandler.setMin(0);
-        }
-
-        // Alarm will trigger the pop-up dialog
-        PendingIntent pendingIntent = PendingIntent.getService(
-                getApplicationContext(),
-                0,
-                new Intent(getApplicationContext(), PopupService.class),
-                PendingIntent.FLAG_CANCEL_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        // Set time for survey pop-up
-        Calendar cal = Calendar.getInstance();
-
-        // Get alarm time
-        int hr = alertHandler.getHr();
-        int min = alertHandler.getMin();
-        int curr_hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-        int curr_min = Calendar.getInstance().get(Calendar.MINUTE);
-
-        // If it's after the alarm time, schedule for next day
-        Toast.makeText(getApplicationContext(), curr_hr + ":" + curr_min + " " + hr + ":" + min, Toast.LENGTH_SHORT).show();
-        if ( curr_hr > hr || curr_hr == hr && curr_min > min) {
-            Toast.makeText(getApplicationContext(), "Next Day", Toast.LENGTH_SHORT).show();
-            cal.add(Calendar.DAY_OF_YEAR, 1); // add, not set!
-        }
-
-        cal.set(Calendar.HOUR_OF_DAY, hr);
-        cal.set(Calendar.MINUTE, min);
-        cal.set(Calendar.SECOND, 0);
-
-        // Set alarm for survey pop-up to go off at default of 8:00 AM
-        alarmManager.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                cal.getTimeInMillis(),
-                alarmManager.INTERVAL_DAY,
-                pendingIntent);
-    }
-
 }

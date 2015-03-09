@@ -102,7 +102,7 @@ public class SurveyDatabaseHandler extends SQLiteOpenHelper {
         long q3_t = Long.parseLong(cursor.getString(cursor.getColumnIndex(KEY_Q3_T)));
         long q4_t = Long.parseLong(cursor.getString(cursor.getColumnIndex(KEY_Q4_T)));
 
-        Survey survey = new Survey(q1, q2, q3, q4, q1_t, q2_t, q3_t, q4_t);
+        Survey survey = new Survey(q1, q2, q3, q4, q1_t, q2_t, q3_t, q4_t, 0);
 
         cursor.close();
         db.close();

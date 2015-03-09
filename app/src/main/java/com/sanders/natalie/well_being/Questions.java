@@ -3,12 +3,16 @@ package com.sanders.natalie.well_being;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Created by Natalie on 2/16/2015.
@@ -24,7 +28,7 @@ public class Questions extends Activity {
 
     private int       id;
     private String    question;
-    private String [] sub_ques; // {getString(R.string.Q1_1)
+    private List<String> sub_ques; // {getString(R.string.Q1_1)
     private long   [] tstamp;
     private int    [] ans;
     private int       size;
@@ -38,14 +42,19 @@ public class Questions extends Activity {
 
         // Retrieve survey's id
         Intent curr_intent = getIntent();
-        id = curr_intent.getIntExtra("ID", 0);
+        id = curr_intent.getIntExtra("ID", 1);
 
         // Initialize variables
         question = dbHandler.getBaseQues(id);
         sub_ques = dbHandler.getSubQuesArray(id);
-        size     = sub_ques.length;
+        size     = sub_ques.size();
         ans      = new int[size];
         tstamp   = new long[size];
+
+        Log.d("Size", "size = " + size);
+
+        // Initialize View
+        setContentView(R.layout.activity_question2);
 
         // Initialize Buttons
         nextBttn = (Button)   findViewById(R.id.bttnNext);
@@ -58,9 +67,8 @@ public class Questions extends Activity {
         rows[3]  = (TableRow) findViewById(R.id.tableRow4);
         rows[4]  = (TableRow) findViewById(R.id.tableRow5);
 
-        // Initialize View
-        setContentView(R.layout.activity_question1);
-        subQtxt.setText(sub_ques[vwNo]);
+        // Set Text
+        subQtxt.setText(sub_ques.get(vwNo));
         baseQtxt.setText(question);
 
         // On the event of the user clicking 'next'
@@ -87,10 +95,11 @@ public class Questions extends Activity {
                     set_tstamp();
                 }
                 vwNo++;
-                subQtxt.setText(sub_ques[vwNo]);
+                subQtxt.setText(sub_ques.get(vwNo));
                 reset_colors();
                 if(ans[vwNo] != 0) {
-                    rows[vwNo].setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
+                    int rowNo = ans[vwNo] - 1;
+                    rows[rowNo].setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
                 }
 
             }
@@ -101,9 +110,19 @@ public class Questions extends Activity {
         prevBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                vwNo--;
-                subQtxt.setText(sub_ques[vwNo]);
-                reset_colors();
+                if(vwNo - 1 == -1) {
+                    Intent intent = new Intent(Questions.this, Start.class);
+                    startActivityForResult(intent, 2);
+                }
+                else {
+                    vwNo--;
+                    subQtxt.setText(sub_ques.get(vwNo));
+                    reset_colors();
+                    if(ans[vwNo] != 0) {
+                        int rowNo = ans[vwNo] - 1;
+                        rows[rowNo].setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
+                    }
+                }
             }
         });
 
@@ -221,7 +240,7 @@ public class Questions extends Activity {
 
             // Reset question and view number
             vwNo = size - 1;
-            subQtxt.setText(sub_ques[vwNo]);
+            subQtxt.setText(sub_ques.get(vwNo));
 
         }
     }

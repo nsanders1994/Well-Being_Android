@@ -55,7 +55,7 @@
             android:layout_marginBottom="2dp">
 
             <TextView
-                android:id="@+id/txtSurveyTime"
+                android:id="@+id/txtSubQ4"
                 android:text="Start Survey Manually"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#ff364cff"

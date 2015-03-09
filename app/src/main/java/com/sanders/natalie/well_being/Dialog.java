@@ -24,11 +24,17 @@ public class Dialog extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Get survey ID from caller intent
+        Intent caller = getIntent();
+        ID = caller.getIntExtra("ID", 1);
+
+        // Initialize Database
         final AlertDatabaseHandler dbHandler = new AlertDatabaseHandler(getApplicationContext());
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
-        // set title
-        alertDialogBuilder.setTitle("Well-Being Survey");
+        // Set title
+        String title = dbHandler.getName(ID);
+        alertDialogBuilder.setTitle(title + " Survey");
 
         // set dialog message
         alertDialogBuilder
@@ -41,8 +47,15 @@ public class Dialog extends Activity {
                         dbHandler.setDelays(delays, ID);
 
                         if (delays < 2) {
+                            // Create new intent with ID extra
                             Intent intent = new Intent(Dialog.this, PopupService.class);
-                            PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 10, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            intent.putExtra("ID", ID);
+                            PendingIntent pendingIntent = PendingIntent.getService(
+                                    getApplicationContext(),
+                                    ID,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT
+                            );
 
                             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
@@ -51,6 +64,7 @@ public class Dialog extends Activity {
                                     SystemClock.elapsedRealtime() + 60 * 1000, pendingIntent);
                             dialogInterface.cancel();
                             finish();
+
                         } else if (delays == 2) {
                             dbHandler.setDelays(0, ID);
                             dialogInterface.cancel();
@@ -64,18 +78,38 @@ public class Dialog extends Activity {
                         Toast.makeText(getApplicationContext(), String.valueOf(dbHandler.getDelays(ID)), Toast.LENGTH_SHORT).show();
 
                         if (dbHandler.getDelays(ID) > 0) {
+
                             dbHandler.setDelays(0, ID);
+
                             Intent i = new Intent(getApplicationContext(), DelayExplanation.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            i.putExtra("ID", ID);
+
                             startActivity(i);
                             dialog.cancel();
                             finish();
+
                         } else {
+                            Class QActivity;
                             dbHandler.setDelays(0, ID);
-                            Intent i = new Intent(getApplicationContext(), Question1.class);
+                            int set_type = dbHandler.getSetType(ID);
+
+                            if(set_type == 1) {
+                                QActivity = Questions.class;
+                            }
+                            else if(set_type == 2) {
+                                QActivity = Question1_Slider.class;
+                            }
+                            else {
+                                QActivity = Questions.class;
+                            }
+
+                            Intent i = new Intent(getApplicationContext(), QActivity);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            i.putExtra("ID", ID);
+
                             startActivity(i);
                             dialog.cancel();
                             finish();

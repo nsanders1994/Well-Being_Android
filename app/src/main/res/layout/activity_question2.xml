@@ -80,7 +80,7 @@
             android:focusable="true">
 
             <TextView
-                android:id="@+id/txtSurveyTime"
+                android:id="@+id/txtSubQ4"
                 android:text="@string/scale2"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#ff364cff"
@@ -120,7 +120,7 @@
             android:clickable="true">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/txtSubQ1"
                 android:text="@string/scale4"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#ff364cff"

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -15,6 +16,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Natalie on 2/15/2015.
@@ -37,9 +40,60 @@ public class UpdateService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Updates");
+        final Calendar current_date = Calendar.getInstance();
+        ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Updates");
         query.orderByDescending("updatedAt");
-        // TODO Collect all updates within 24 hr peroid; iterate from oldest to newest
+
+        query.findInBackground(new FindCallback<ParseObject>() {
+               public void done(List<ParseObject> updates, ParseException e) {
+            if (e == null) {
+
+            } else {
+                Calendar update_time = Calendar.getInstance();
+
+                for(int i = 0; i < updates.size(); i++) {
+                    ParseObject curr_update = updates.get(i);
+                    update_time.setTime(curr_update.getCreatedAt());
+                    long time_diff = current_date.getTimeInMillis() - update_time.getTimeInMillis();
+
+                    if(time_diff > 24*60*60*1000) {
+                        break;
+                    }
+                    else {
+                        ParseObject updated_survey = curr_update.getParseObject("Survey_Update");
+                        String survey_parse_id = updated_survey.getObjectId();
+
+                        if(dbHandler.isNewSurvey(survey_parse_id)) {
+                            dbHandler.createSurvey(
+                                    survey_parse_id,
+                                    updated_survey.getString("Name"),
+                                    updated_survey.getString("BaseQ"),
+                                    updated_survey.getString("SubQ"),
+                                    updated_survey.getInt("Hr"),
+                                    updated_survey.getInt("Min"),
+                                    updated_survey.getInt("SetType")
+                            );
+                        }
+                        else {
+                            dbHandler.setHr(updated_survey.getInt("Hr"), survey_parse_id);
+                            dbHandler.setMin(updated_survey.getInt("Min"), survey_parse_id);
+                            dbHandler.setBaseQues(updated_survey.getString("BaseQ"), survey_parse_id);
+                            dbHandler.setSubQues(updated_survey.getString("SubQ"), survey_parse_id);
+                            dbHandler.setName(updated_survey.getString("Name"), survey_parse_id);
+                        }
+
+                        set_DialogAlarm(
+                               updated_survey.getInt("Hr"),
+                               updated_survey.getInt("Min"),
+                               dbHandler.getTableID(survey_parse_id)
+                        );
+                    }
+                }
+            }
+            }
+        });
+
+        /*
         query.getFirstInBackground(new GetCallback<ParseObject>() {
             public void done(ParseObject object, ParseException e) {
                 if (object == null) {
@@ -51,19 +105,19 @@ public class UpdateService extends IntentService {
                     Toast.makeText(getApplicationContext(), "New time = " + hr + ":" + min, Toast.LENGTH_SHORT).show();
                 }
             }
-        });
+        });*/
     }
 
-    public void reset_DialogAlarm(int hr, int min) {
+    public void set_DialogAlarm(int hr, int min, int table_id) {
 
-        dbHandler.setHr(hr);
-        dbHandler.setMin(min);
+        Intent intent = new Intent(UpdateService.this, PopupService.class);
+        intent.putExtra("ID", table_id);
 
         // Alarm is reset at new time
         PendingIntent pendingIntent = PendingIntent.getService(
                 getApplicationContext(),
-                0,
-                new Intent(UpdateService.this, PopupService.class),
+                table_id,
+                intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

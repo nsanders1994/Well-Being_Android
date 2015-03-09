@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">Well-Being</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Change pop-up time</string>
     <string name="submit">Submit</string>
     <string name="back">Back</string>
@@ -34,5 +33,6 @@
     <string name="time_change">Change Pop-Up Time</string>
     <string name="manual_startup">Start Survey Manually</string>
     <string name="Checkmark">Checkmark</string>
+    <string name="prev_started">previously_started</string>
 
 </resources>
