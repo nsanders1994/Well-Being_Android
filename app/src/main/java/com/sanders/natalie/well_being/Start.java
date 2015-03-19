@@ -24,20 +24,17 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.codec.binary.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
 
 
 public class Start extends Activity {
-    AlertDatabaseHandler dbHandler;
+    SurveyDatabaseHandler dbHandler;
     List<Integer> survey_ids = new ArrayList<Integer>();
     ListView startListView;
     StartListAdapter startListAdapter;
@@ -46,7 +43,7 @@ public class Start extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        dbHandler = new AlertDatabaseHandler(getApplicationContext());
+        dbHandler = new SurveyDatabaseHandler(getApplicationContext());
 
         // If app was just installed get all surveys from Parse and store in database
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -73,8 +70,6 @@ public class Start extends Activity {
                             );
 
                             start_DialogAlarm(hour, minute, i);
-
-                            //Log.d("Type from Parse", ">>>>>>>>>>>>>>>>> type from parse = " + curr_survey.getInt("Type"));
                         }
                         SharedPreferences.Editor edit = prefs.edit();
                         edit.putBoolean(getString(R.string.prev_started), Boolean.TRUE);
@@ -94,7 +89,7 @@ public class Start extends Activity {
         startListAdapter = new StartListAdapter();
         startListView.setAdapter(startListAdapter);
 
-        dbHandler = new AlertDatabaseHandler(getApplicationContext());
+        dbHandler = new SurveyDatabaseHandler(getApplicationContext());
         survey_ids = dbHandler.getSurveyIDs();
 
         // Start background service to check for updated popup times
@@ -104,19 +99,26 @@ public class Start extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-
-                Log.d("Start List", ">>>>>>>>>>>>>>>>>>>>> ON CLICK");
                 int curr_id = survey_ids.get(position);
                 int set_type = dbHandler.getSetType(curr_id);
+                int hr = dbHandler.getHr(curr_id);
+                int min = dbHandler.getMin(curr_id);
+
+
                 Intent i;
-                Log.d("Set Type", ">>>>>>>>>>>>>>>>>>>> set type = " + set_type);
-                if(set_type == 1) {
-                    i = new Intent(Start.this, Questions.class);
+                int curr_hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+                int curr_min = Calendar.getInstance().get(Calendar.MINUTE);
+
+                if ( curr_hr > hr + 1 || curr_hr < hr) {
+                    Toast.makeText(getApplicationContext(), "Survey inaccessible at this time", Toast.LENGTH_SHORT);
+                }
+                else if (set_type == 1) {
+                    i = new Intent(Start.this, Questions_MultChoice.class);
                     i.putExtra("ID",survey_ids.get(position));
                     startActivity(i);
                 }
                 else if (set_type == 2) {
-                    i = new Intent(Start.this, Question1_Slider.class);
+                    i = new Intent(Start.this, Questions_Slider.class);
                     i.putExtra("ID",survey_ids.get(position));
                     startActivity(i);
                 }
@@ -180,71 +182,6 @@ public class Start extends Activity {
                 pendingIntent);
     }
 
-    /*public void reset_DialogAlarm(int p_hr, int p_min) {
-
-        // Database handler for accessing alarm time
-        if(dbHandler.isInitialized() > 0) {
-            dbHandler.setHr(4);
-            dbHandler.setMin(17);
-        }
-        else {
-            dbHandler.init();
-            dbHandler.setHr(12);
-            dbHandler.setMin(0);
-        }
-
-        // Alarm is reset at new time for the next day
-        PendingIntent pendingIntent = PendingIntent.getService(
-                getApplicationContext(),
-                0,
-                new Intent(getApplicationContext(), PopupService.class),
-                PendingIntent.FLAG_CANCEL_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        // Get alarm time
-        int hr = dbHandler.getHr();
-        int min = dbHandler.getMin();
-
-        // Set time for next day
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, 1); // add, not set!
-        cal.set(Calendar.HOUR_OF_DAY, hr);
-        cal.set(Calendar.MINUTE, min);
-        cal.set(Calendar.SECOND, 0);
-
-        // Set alarm for survey pop-up to go off at default of 8:00 AM
-        alarmManager.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                cal.getTimeInMillis(),
-                alarmManager.INTERVAL_DAY,
-                pendingIntent);
-
-        // If the popup hasn't already come today, reset today's alarm for the previous time
-        if(Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < p_hr &&
-           Calendar.getInstance().get(Calendar.MINUTE) <= p_min)
-        {
-
-            PendingIntent pendingIntent2 = PendingIntent.getService(
-                    getApplicationContext(),
-                    1,
-                    new Intent(Start.this, PopupService.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-
-            AlarmManager alarmManager2 = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-            Calendar cal2 = Calendar.getInstance();
-            cal2.set(Calendar.HOUR_OF_DAY, hr);
-            cal2.set(Calendar.MINUTE, min);
-            cal2.set(Calendar.SECOND, 0);
-
-            alarmManager2.set(
-                    AlarmManager.RTC_WAKEUP,
-                    cal2.getTimeInMillis(),
-                    pendingIntent2);
-        }
-    }*/
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -254,49 +191,8 @@ public class Start extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        /*int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            // The alarm time before reset
-            int prevAlarm_hr = dbHandler.getHr();
-            int prevAlarm_min = dbHandler.getMin();
-
-            // Administrator changes time for next day
-            Intent i = new Intent(this, ChangeSettings.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            startActivity(i);
-
-            // Dialog Alarm is reset
-            reset_DialogAlarm(prevAlarm_hr, prevAlarm_min);
-        }*/
         return super.onOptionsItemSelected(item);
     }
-
-    /*private class SurveyAdapter extends ArrayAdapter<Note> {
-        public NoteAdapter() {
-
-            super (Start.this, R.layout.listview_note, Notes);
-        }
-
-        @Override
-        public View getView(int position, View view, ViewGroup parent) {
-            if (view == null)
-                view = getLayoutInflater().inflate(R.layout.listview_note, parent, false);
-            Note currentNote = Notes.get(position);
-
-            TextView label = (TextView) view.findViewById(R.id.currentLabel);
-            label.setText(currentNote.get_label());
-
-            return view;
-        }
-    }
-
-    private void populateList() {
-        adapter = new NoteAdapter();
-        noteListView.setAdapter(adapter);
-    }*/
 
     public class StartListAdapter extends BaseAdapter {
         @Override
@@ -333,29 +229,60 @@ public class Start extends Activity {
             String min_str = ("00" + min).substring(String.valueOf(min).length());
 
             // Get hour string
-            if(hr == 0) {
-                hr_str = "12";
-            }
-            else if (hr > 12) {
-                hr_str = String.valueOf(hr % 12);
-            }
-            else {
-                hr_str = String.valueOf(hr);
-            }
+            if      (hr == 0)  hr_str = "12";
+            else if (hr > 12)  hr_str = String.valueOf(hr % 12);
+            else               hr_str = String.valueOf(hr);
 
             if (hr >= 12) {
-                t_str = hr_str + ":" + min_str + " PM";
+                int end_hr;
+                String end_zone = "PM";
+
+                if(hr == 12) {
+                    end_hr = 1;
+                }
+                else {
+                    end_hr = Integer.parseInt(hr_str) + 1;
+                    if(hr == 11) {
+                        end_zone = "AM";
+                    }
+                }
+
+                t_str = hr_str + ":" + min_str + " PM - " + end_hr + ":" + min_str + " " + end_zone;
             }
             else {
-                t_str = hr_str + ":" + min_str + " AM";
+                String end_zone = "AM";
+
+                if (hr == 11) {
+                    end_zone = "PM";
+                }
+                t_str = hr_str + ":" + min_str + " AM - " + String.valueOf(hr + 1) + ":" + min_str + " " + end_zone;
             }
 
+            // Set strings;
             time.setText(t_str);
             name.setText(dbHandler.getName(arg0 + 1));
+
+            // Gray out text if survey is not available
+            int curr_hr = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            int curr_min = Calendar.getInstance().get(Calendar.MINUTE);
+
+            if ( curr_hr > hr + 1|| curr_hr < hr) {
+                time.setTextColor(getResources().getColor(android.R.color.darker_gray));
+                name.setTextColor(getResources().getColor(android.R.color.darker_gray));
+            }
 
             return arg1;
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
+    }
+
 }
 
 

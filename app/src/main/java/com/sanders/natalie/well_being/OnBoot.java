@@ -17,7 +17,7 @@ public class OnBoot extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         // Retrieve number of surveys from database
-        final AlertDatabaseHandler dbHandler = new AlertDatabaseHandler(context);
+        final SurveyDatabaseHandler dbHandler = new SurveyDatabaseHandler(context);
         List<Integer> survey_ids = dbHandler.getSurveyIDs();
 
         // Create a repeating alarm for popup for every survey at the specified time

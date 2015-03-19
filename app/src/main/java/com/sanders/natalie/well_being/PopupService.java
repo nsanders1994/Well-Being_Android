@@ -10,7 +10,7 @@ import android.media.AudioManager;
  */
 public class PopupService extends IntentService {
     private static final String TAG = PopupService.class.getSimpleName();
-    private AlertDatabaseHandler dbHandler;
+    private SurveyDatabaseHandler dbHandler;
 
     public PopupService() {
         super("Service");

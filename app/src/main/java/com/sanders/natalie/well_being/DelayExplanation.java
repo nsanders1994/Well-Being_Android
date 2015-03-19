@@ -12,16 +12,29 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class DelayExplanation extends Activity {
+    int ID;
+    int setType;
     EditText expTxt;
+    SurveyDatabaseHandler dbHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Get ID of survey
+        Intent caller = getIntent();
+        ID = caller.getIntExtra("ID", 1);
         setContentView(R.layout.activity_delay_explanation);
 
+        // Initialize database and get survey values
+        dbHandler = new SurveyDatabaseHandler(getApplicationContext());
+        setType = dbHandler.getSetType(ID);
+
+        // Initialize View
         final Button submitBttn = (Button) findViewById(R.id.bttnNext);
         expTxt = (EditText) findViewById(R.id.editExplanation);
 
+        // Wait for user to fill in response
         expTxt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {}
@@ -40,15 +53,31 @@ public class DelayExplanation extends Activity {
             @Override
             public void afterTextChanged(Editable editable) {}
         });
+
+        // When the user clicks 'Submit'
         submitBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(DelayExplanation.this, Question1.class);
+                Intent intent;
+
+                dbHandler.setExplanation(expTxt.getText().toString(), ID);
+
+                if(setType == 1) {
+                    intent = new Intent(DelayExplanation.this, Questions_MultChoice.class);
+                }
+                else if(setType == 2) {
+                    intent = new Intent(DelayExplanation.this, Questions_Slider.class);
+                }
+                else {
+                    intent = new Intent(DelayExplanation.this, Questions_MultChoice.class);
+                }
+
+                intent.putExtra("ID", ID);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

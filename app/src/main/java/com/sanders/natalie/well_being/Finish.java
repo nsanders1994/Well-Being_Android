@@ -30,6 +30,7 @@ public class Finish extends Activity {
     long [] tstamp;
     int     size;
     int     id;
+    int     set_type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +43,13 @@ public class Finish extends Activity {
         TextView progressTxt    = (TextView) findViewById(R.id.txtProgress);
 
         Intent curr_intent = getIntent();
+        set_type = curr_intent.getIntExtra("SET_TYPE", 1);
         ans_ct = curr_intent.getIntExtra("CT", 0);
         ans    = curr_intent.getIntArrayExtra("ANS");
         tstamp = curr_intent.getLongArrayExtra("TSTAMP");
         id     = curr_intent.getIntExtra("ID", 0);
         size = ans.length;
-        //Survey s = curr_intent.getParcelableExtra("SURVEY");
-        //if(s != null) { survey = s; }
+
 
         progressTxt.setText(ans_ct + "/" + size + " Questions Answered");
         //int n = survey.get_num_answered();
@@ -57,60 +58,65 @@ public class Finish extends Activity {
         submitBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(back_valid) {
-                    Toast.makeText(getApplicationContext(), "The survey has been submitted.", Toast.LENGTH_SHORT).show();
-                    back_valid = false;
+                Toast.makeText(getApplicationContext(), "The survey has been submitted.", Toast.LENGTH_SHORT).show();
+                back_valid = false;
 
-                    // Send survey data to csv file on phone
-                    DateFormat df = new SimpleDateFormat("MM-dd-yy_HH:mm");
-                    Date dateobj = new Date();
+                // Submit survey to parse website
+                sendToParse();
 
-                    //createCVS(df.format(dateobj) + ".csv");
-
-                    // Submit survey to parse website
-                    sendToParse();
-
-                    // TODO Return to start screen of app as result 4, in start screen activity go to home screen on returned 4
-                    // Return to home screen
-                    Intent startMain = new Intent(Intent.ACTION_MAIN);
-                    startMain.addCategory(Intent.CATEGORY_HOME);
-                    startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(startMain);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "This survey has already been submitted.", Toast.LENGTH_SHORT).show();
-                }
+                // Return to home screen
+                Intent intent = new Intent(Finish.this, Start.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
             }
         });
 
         prevBttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Finish.this, Question2.class);
-                intent.putExtra("ANS", ans);
-                intent.putExtra("TSTAMP", tstamp);
-                //intent.putExtra("SURVEY", survey);
-                if(intent != null && back_valid) {
-                    setResult(5, intent);
-                    finish();
+                Intent intent;
+
+                if(set_type == 1) {
+                    intent = new Intent(Finish.this, Questions_MultChoice.class);
+                }
+                else if(set_type == 2) {
+                    intent = new Intent(Finish.this, Questions_Slider.class);
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "This survey has already been submitted.", Toast.LENGTH_SHORT).show();
+                    intent = new Intent(Finish.this, Questions_MultChoice.class);
                 }
+
+                intent.putExtra("ANS", ans);
+                intent.putExtra("TSTAMP", tstamp);
+                intent.putExtra("SET_TYPE", set_type);
+
+                setResult(3, intent);
+                finish();
             }
         });
     }
 
     @Override
     public void onBackPressed() {
-        // Disable the phone's back button if the survey's been submitted
-        if(back_valid) {
-            finish();
+        Intent intent;
+
+        if(set_type == 1) {
+            intent = new Intent(Finish.this, Questions_MultChoice.class);
+        }
+        else if(set_type == 2) {
+            intent = new Intent(Finish.this, Questions_Slider.class);
         }
         else {
-            // TODO Return to start screen
-            Toast.makeText(getApplicationContext(), "This survey has already been submitted.", Toast.LENGTH_SHORT).show();
+            intent = new Intent(Finish.this, Questions_MultChoice.class);
         }
+
+        intent.putExtra("ANS", ans);
+        intent.putExtra("TSTAMP", tstamp);
+        intent.putExtra("SET_TYPE", set_type);
+
+        setResult(3, intent);
+        finish();
+
     }
 
    /* public void createCVS(String filename) {
@@ -173,29 +179,6 @@ public class Finish extends Activity {
         }
 
         new_survey.saveInBackground();
-
-        /*
-        Map<String, String> Q1 = new HashMap<String, String>();
-        Map<String, String> Q2 = new HashMap<String, String>();
-        Map<String, String> Q3 = new HashMap<String, String>();
-        Map<String, String> Q4 = new HashMap<String, String>();
-
-        Q1.put("value", String.valueOf(survey.get_q1()));
-        Q2.put("value", String.valueOf(survey.get_q2()));
-        Q3.put("value", String.valueOf(survey.get_q3()));
-        Q4.put("value", String.valueOf(survey.get_q4()));
-
-        Q1.put("timestamp", String.valueOf(survey.get_q1_tstamp()));
-        Q2.put("timestamp", String.valueOf(survey.get_q2_tstamp()));
-        Q3.put("timestamp", String.valueOf(survey.get_q3_tstamp()));
-        Q4.put("timestamp", String.valueOf(survey.get_q4_tstamp()));
-
-        new_survey.put("PID", Installation.id(this));
-        new_survey.put("Q1", Q1);
-        new_survey.put("Q2", Q2);
-        new_survey.put("Q3", Q3);
-        new_survey.put("Q4", Q4);
-        new_survey.saveInBackground(); */
     }
 
     @Override

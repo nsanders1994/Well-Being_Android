@@ -29,7 +29,7 @@ public class Dialog extends Activity {
         ID = caller.getIntExtra("ID", 1);
 
         // Initialize Database
-        final AlertDatabaseHandler dbHandler = new AlertDatabaseHandler(getApplicationContext());
+        final SurveyDatabaseHandler dbHandler = new SurveyDatabaseHandler(getApplicationContext());
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         // Set title
@@ -96,13 +96,13 @@ public class Dialog extends Activity {
                             int set_type = dbHandler.getSetType(ID);
 
                             if(set_type == 1) {
-                                QActivity = Questions.class;
+                                QActivity = Questions_MultChoice.class;
                             }
                             else if(set_type == 2) {
-                                QActivity = Question1_Slider.class;
+                                QActivity = Questions_Slider.class;
                             }
                             else {
-                                QActivity = Questions.class;
+                                QActivity = Questions_MultChoice.class;
                             }
 
                             Intent i = new Intent(getApplicationContext(), QActivity);

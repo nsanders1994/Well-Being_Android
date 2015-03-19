@@ -5,18 +5,14 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,7 +20,7 @@ import java.util.List;
  */
 public class UpdateService extends IntentService {
 
-    AlertDatabaseHandler dbHandler;
+    SurveyDatabaseHandler dbHandler;
 
     public UpdateService() {
         super("Service");
@@ -33,7 +29,7 @@ public class UpdateService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        dbHandler = new AlertDatabaseHandler(getApplicationContext());
+        dbHandler = new SurveyDatabaseHandler(getApplicationContext());
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, "Z6S6iux9qyLGcCsAE3vuRvhHWDwFelxzT2nSqKWc", "boXMTOaotk2HgGpxFLdNNPFw1d7WwB7c3G4nPHak");
     }
@@ -85,27 +81,13 @@ public class UpdateService extends IntentService {
                         set_DialogAlarm(
                                updated_survey.getInt("Hr"),
                                updated_survey.getInt("Min"),
-                               dbHandler.getTableID(survey_parse_id)
+                               dbHandler.parseToTableID(survey_parse_id)
                         );
                     }
                 }
             }
             }
         });
-
-        /*
-        query.getFirstInBackground(new GetCallback<ParseObject>() {
-            public void done(ParseObject object, ParseException e) {
-                if (object == null) {
-                    Log.d("Updates", "The getFirst request failed.");
-                } else {
-                    int hr = object.getInt("Hour");
-                    int min = object.getInt("Minute");
-                    reset_DialogAlarm(hr, min);
-                    Toast.makeText(getApplicationContext(), "New time = " + hr + ":" + min, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });*/
     }
 
     public void set_DialogAlarm(int hr, int min, int table_id) {

@@ -3,22 +3,19 @@ package com.sanders.natalie.well_being;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableRow;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /*
  * Created by Natalie on 2/16/2015.
  */
 
-public class Questions extends Activity {
+public class Questions_MultChoice extends Activity {
     private Button      nextBttn;
     private Button      prevBttn;
     private TextView    subQtxt;
@@ -26,35 +23,35 @@ public class Questions extends Activity {
     private TableRow [] rows = new TableRow[5];
     private int         vwNo = 0;
 
-    private int       id;
-    private String    question;
-    private List<String> sub_ques; // {getString(R.string.Q1_1)
-    private long   [] tstamp;
-    private int    [] ans;
-    private int       size;
-    private int       ans_ct  = 0;
-    private boolean   new_ans = false;
+    private int          ID;
+    private String       question;
+    private List<String> sub_ques;
+    private long   []    tstamp;
+    private int    []    ans;
+    private int          set_type;
+    private int          size;
+    private int          ans_ct  = 0;
+    private boolean      new_ans = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AlertDatabaseHandler dbHandler = new AlertDatabaseHandler(getApplicationContext());
+        final SurveyDatabaseHandler dbHandler = new SurveyDatabaseHandler(getApplicationContext());
 
         // Retrieve survey's id
         Intent curr_intent = getIntent();
-        id = curr_intent.getIntExtra("ID", 1);
+        ID = curr_intent.getIntExtra("ID", 1);
 
         // Initialize variables
-        question = dbHandler.getBaseQues(id);
-        sub_ques = dbHandler.getSubQuesArray(id);
+        question = dbHandler.getBaseQues(ID);
+        sub_ques = dbHandler.getSubQuesList(ID);
+        set_type = dbHandler.getSetType(ID);
         size     = sub_ques.size();
         ans      = new int[size];
         tstamp   = new long[size];
 
-        Log.d("Size", "size = " + size);
-
         // Initialize View
-        setContentView(R.layout.activity_question2);
+        setContentView(R.layout.activity_5multchoice);
 
         // Initialize Buttons
         nextBttn = (Button)   findViewById(R.id.bttnNext);
@@ -77,7 +74,7 @@ public class Questions extends Activity {
             public void onClick(View view) {
             if(vwNo + 1 == size)
             {
-                Intent intent = new Intent(Questions.this, Finish.class);
+                Intent intent = new Intent(Questions_MultChoice.this, Finish.class);
                 if(new_ans) {
                     set_tstamp();
                 }
@@ -85,9 +82,10 @@ public class Questions extends Activity {
                 intent.putExtra("ANS", ans);
                 intent.putExtra("TSTAMP", tstamp);
                 intent.putExtra("CT", ans_ct);
-                intent.putExtra("ID", id);
+                intent.putExtra("TYPE", set_type);
+                intent.putExtra("ID", ID);
 
-                startActivityForResult(intent, 5);
+                startActivityForResult(intent, 3);
             }
             else
             {
@@ -111,7 +109,7 @@ public class Questions extends Activity {
             @Override
             public void onClick(View view) {
                 if(vwNo - 1 == -1) {
-                    Intent intent = new Intent(Questions.this, Start.class);
+                    Intent intent = new Intent(Questions_MultChoice.this, Start.class);
                     startActivityForResult(intent, 2);
                 }
                 else {
@@ -225,7 +223,7 @@ public class Questions extends Activity {
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 5 && data != null) {
+        if (requestCode == 3 && data != null) {
             // Get answer and timestamp array previously passed to Finish activity
             ans = data.getIntArrayExtra("ANS");
             tstamp = data.getLongArrayExtra("TSTAMP");
